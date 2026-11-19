@@ -35,24 +35,22 @@
 
 ## 从源码运行
 
-源码在 `src/`（`package.json` 与 `src/main.js`）。本仓库不包含安装包。
+源码在仓库根目录（`package.json` 与 `src/main.js`）。本仓库不包含安装包。
 
 ```bash
-cd src
 npm install
 npm start            # Electron 桌面端
 # 仅预览渲染进程：
 npm run preview      # http://localhost:5173
 npm test             # Playwright
 ```
-
 ## 文档
 
-- [源码与脚本](src/package.json)
+- [源码与脚本](package.json)
 
 ## 许可证
 
-`src/package.json` 声明为 MIT。仓库根目录未附带 LICENSE 文件。
+`package.json` 声明为 MIT。仓库根目录未附带 LICENSE 文件。
 
 ---
 
@@ -95,22 +93,20 @@ npm test             # Playwright
 
 ## Getting started
 
-Source is under `src/` (`package.json` and `src/main.js`). This repository does not include installers.
+Source is at the repository root (`package.json` and `src/main.js`). This repository does not include installers.
 
 ```bash
-cd src
 npm install
 npm start            # Electron desktop app
 # Renderer-only preview:
 npm run preview      # http://localhost:5173
 npm test             # Playwright
 ```
-
 ## Documentation
 
-- [源码与脚本](src/package.json)
+- [源码与脚本](package.json)
 
 ## License
 
-`src/package.json` declares MIT. There is no LICENSE file at the repository root.
+`package.json` declares MIT. There is no LICENSE file at the repository root.
 
