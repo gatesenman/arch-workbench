@@ -1,0 +1,22 @@
+const { chromium } = require('playwright'); const path = require('path');
+const O = n => path.resolve('test-results/screenshots-2.7', n);
+const sse = t => t.match(/[\s\S]{1,12}/g).map(c => `data: ${JSON.stringify({ choices: [{ delta: { content: c } }] })}\n\n`).join('') + 'data: [DONE]\n\n';
+(async () => { const b = await chromium.launch(); const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.route('https://mock-llm.test/**', async r => { const q = JSON.parse(r.request().postData());
+    if (q.tools) { if (!q.messages.some(m => m.role === 'tool')) return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ choices: [{ message: { content: '', reasoning_content: '用户询问高层教学楼疏散与日照，需要先调用 GB 50016 校核工具与日照标准，再检索知识库给出依据。', tool_calls: [{ id: 'a', type: 'function', function: { name: 'check_fire_code', arguments: '{"height":30,"evacDist":34,"sprinkler":"是"}' } }, { id: 'b', type: 'function', function: { name: 'sunlight_standard', arguments: '{"type":"中小学校"}' } }, { id: 'c', type: 'function', function: { name: 'search_knowledge', arguments: '{"query":"教学建筑 疏散距离 日照"}' } }] } }], usage: { prompt_tokens: 1820, completion_tokens: 96 } }) });
+      return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ choices: [{ message: { content: '## 结论\n- 30 m 教学楼属**二类高层公共建筑**，全设喷淋时两出口间疏散距离 ≤ 37.5 m，设计 34 m **满足** [来源1]。\n- 普通教室冬至日满窗日照 ≥ 2 h [来源2]，需日照分析复核【待人工确认】。\n\n### 下一步\n- 打开「规范符合性校核」生成正式报告。' } }], usage: { prompt_tokens: 2610, completion_tokens: 180 } }) }); }
+    return r.fulfill({ contentType: 'text/event-stream', body: sse('## 方案汇报提纲\n\n### 一、项目概况\n成都市某中学新建工程，总建筑面积 52000 ㎡，建筑高度 26 m。\n\n### 二、规范结论\n防火分区与疏散满足 GB 50016 第 5.5.17 条要求。\n\n### 三、待决策事项\n- 风雨操场位置\n- 地下车库规模') }); });
+  await page.goto('file://' + path.resolve('src/index.html')); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('#tree .titem');
+  await page.evaluate(() => { const db = JSON.parse(localStorage.getItem('aw-db-v2')); Object.assign(db.settings, { mode: 'llm', apiKey: 'demo', endpoint: 'https://mock-llm.test/v1', model: 'deepseek-chat', aiAutoFill: false, retries: 0 }); db.onboarded = true; localStorage.setItem('aw-db-v2', JSON.stringify(db)); }); await page.reload(); await page.waitForSelector('#tree .titem');
+  await page.click('#tree .titem[data-id=report]'); await page.click('#runBtn'); await page.waitForFunction(() => !document.querySelector('#runBtn').disabled); await page.waitForTimeout(600);
+  await page.evaluate(() => document.querySelector('#outBody').scrollTop = 1e9); await page.waitForTimeout(200); await page.screenshot({ path: O('02-AI自检-置信度-待人工确认.png') });
+  await page.keyboard.press('Control+L'); await page.fill('#chatInput', '30m 高的教学楼疏散距离和教室日照怎么控制？'); await page.click('#chatSend');
+  await page.waitForSelector('#chatList .cm-acts'); await page.evaluate(() => document.querySelector('#chatList .trace').open = true); await page.evaluate(() => document.querySelector('#chatList .trace').closest('.cm').scrollIntoView({ block: 'start' })); await page.waitForTimeout(300); await page.screenshot({ path: O('01-助手工具调用轨迹-来源引用.png') });
+  await page.keyboard.press('Control+L');
+  await page.evaluate(() => { const p = [...document.querySelectorAll('#output li')].slice(0, 2); const r = document.createRange(); r.setStartBefore(p[0]); r.setEndAfter(p[p.length - 1]); const s = getSelection(); s.removeAllRanges(); s.addRange(r); p[0].dispatchEvent(new MouseEvent('mouseup', { bubbles: true })); });
+  await page.waitForTimeout(300); await page.screenshot({ path: O('03-选区内联AI工具条.png') });
+  await page.evaluate(() => { const db = window.__aw.db(); db.settings.mode = 'mock'; }); 
+  await page.click('#selTools [data-op=formal]'); await page.waitForSelector('#inlOut:not(:has(.spin))'); await page.waitForTimeout(300); await page.screenshot({ path: O('04-内联改写为正式公文.png') }); await page.click('#modalClose');
+  await page.evaluate(() => document.querySelector('[data-act=prompts]').click()); await page.waitForTimeout(300); await page.screenshot({ path: O('05-提示词模板管理.png') }); await page.click('#ptCancel');
+  await page.evaluate(() => document.querySelector('[data-act=usage]').click()); await page.waitForTimeout(300); await page.screenshot({ path: O('06-用量统计.png') });
+  await b.close(); })();

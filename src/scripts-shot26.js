@@ -1,0 +1,14 @@
+const { chromium } = require('playwright'); const path = require('path');
+const O = n => path.resolve('test-results/screenshots-2.6', n);
+(async () => { const b = await chromium.launch(); const page = await b.newPage({ viewport: { width: 1440, height: 900 } });
+  await page.goto('file://' + path.resolve('src/index.html')); await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('#tree .titem');
+  await page.evaluate(() => { const db = JSON.parse(localStorage.getItem('aw-db-v2')); Object.assign(db.settings, { mode: 'mock', apiKey: '' }); db.onboarded = true; localStorage.setItem('aw-db-v2', JSON.stringify(db)); }); await page.reload(); await page.waitForSelector('#tree .titem');
+  await page.evaluate(() => { const m = document.querySelector('#modal'); if (!m.classList.contains('hidden')) document.querySelector('#obOk')?.click(); });
+  const run = async () => { await page.click('#runBtn'); await page.waitForFunction(() => !document.querySelector('#runBtn').disabled); await page.waitForTimeout(500); };
+  await page.click('#tree .titem[data-id=code]'); await page.fill('#f-height', '30'); await page.fill('#f-evacDist', '34'); await run();
+  await page.evaluate(() => { const o = document.querySelector('#outBody'); o.scrollTop = 0; }); await page.screenshot({ path: O('01-规范校核-分类型GB50016.png') });
+  await page.evaluate(() => document.querySelector('#outBody').scrollTop = 1e9); await page.waitForTimeout(200); await page.screenshot({ path: O('02-结合本项目专业提示.png') });
+  await page.fill('#f-evacDist', '28'); await run(); await page.click('#histBtn'); await page.waitForTimeout(300); await page.screenshot({ path: O('03-版本历史对比.png') }); await page.click('#hvClose');
+  await page.keyboard.press('Control+K'); await page.fill('#palInput', '疏散'); await page.waitForTimeout(300); await page.screenshot({ path: O('04-全局成果检索.png') }); await page.keyboard.press('Escape');
+  await page.evaluate(() => document.querySelector('[data-act=prices]').click()); await page.waitForTimeout(300); await page.screenshot({ path: O('05-单方造价库.png') });
+  await b.close(); })();

@@ -1,0 +1,84 @@
+{
+  "name": "arch-workbench",
+  "productName": "ArchWorkbench",
+  "version": "2.7.1",
+  "description": "建筑师专属工作台 - AI 智能体全流程解决方案",
+  "main": "src/main.js",
+  "author": "ArchWorkbench",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "preview": "npx http-server src -p 5173 || python3 -m http.server 5173 -d src",
+    "test": "playwright test",
+    "dist:win": "npx electron-builder --win nsis portable dir --x64",
+    "dist:setup": "npx electron-builder --win nsis --x64"
+  },
+  "build": {
+    "appId": "com.grokbot.archworkbench",
+    "productName": "ArchWorkbench",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "artifactName": "ArchWorkbench-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "ArchWorkbench-Portable-${version}.exe"
+    },
+    "icon": "build/icon.ico",
+    "extraResources": [],
+    "copyright": "Copyright © ArchWorkbench",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "建筑师专属工作台",
+      "uninstallDisplayName": "建筑师专属工作台 ArchWorkbench",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "include": "installer.nsh",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "menuCategory": false,
+      "displayLanguageSelector": false,
+      "installerLanguages": [
+        "zh_CN",
+        "en_US"
+      ],
+      "multiLanguageInstaller": true,
+      "artifactName": "ArchWorkbench-Setup-${version}.exe",
+      "guid": "com.grokbot.archworkbench"
+    },
+    "afterPack": "./scripts/afterPack.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  }
+}

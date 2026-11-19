@@ -1,0 +1,63 @@
+const { test, expect } = require('@playwright/test');
+const { fresh, shot, createProject, openAgent, run, setField } = require('./helpers');
+test.beforeEach(async ({ page }) => { await fresh(page); });
+
+test('US-21 命令面板：Ctrl+K 搜索智能体并键盘打开', async ({ page }) => {
+  await page.keyboard.press('Control+k');
+  await expect(page.locator('#palette')).toBeVisible(); await expect(page.locator('#palInput')).toBeFocused();
+  await expect(page.locator('#palList .pgrp')).toHaveText(['智能体', '项目', '命令']);
+  await page.keyboard.type('规范');
+  await expect(page.locator('#palList .pitem.on')).toContainText('规范符合性校核');
+  await expect(page.locator('#palList mark').first()).toHaveText('规范');
+  await shot(page, '19-命令面板.png');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#palette')).toBeHidden(); await expect(page.locator('.tab.active')).toContainText('规范校核');
+});
+test('US-22 命令面板：方向键选择、切换项目、执行命令、Esc 关闭', async ({ page }) => {
+  await createProject(page);
+  await page.click('#cmdkBtn');
+  await expect(page.locator('#palInput')).toBeFocused();
+  await page.locator('#palInput').fill('滨江');
+  await expect(page.locator('#palList .pitem.on')).toContainText('滨江');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#propGrid')).toContainText('滨江社区文化中心');
+  await page.keyboard.press('Control+k'); await page.keyboard.type('主题');
+  await page.keyboard.press('Enter'); await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.keyboard.press('Control+k'); await page.keyboard.type('图');
+  const n = await page.locator('#palList .pitem').count(); expect(n).toBeGreaterThan(2);
+  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown');
+  await expect(page.locator('#palList .pitem').nth(2)).toHaveClass(/on/);
+  await page.keyboard.press('ArrowUp'); await expect(page.locator('#palList .pitem').nth(1)).toHaveClass(/on/);
+  await page.fill('#palInput', 'zzzz不存在'); await expect(page.locator('#palList')).toContainText('无匹配结果');
+  await page.keyboard.press('Escape'); await expect(page.locator('#palette')).toBeHidden();
+  await page.click('#cmdkBtn'); await page.keyboard.type('AI 接口设置'); await page.keyboard.press('Enter');
+  await expect(page.locator('#modalTitle')).toHaveText('AI 接口设置');
+});
+test('US-23 表单分组、单位后缀、即时校验与 Toast', async ({ page }) => {
+  await createProject(page);
+  await openAgent(page, 'code');
+  await expect(page.locator('.fsec-h')).toHaveText([/建筑分类/, /防火与疏散/, /通用与无障碍/, /日照/]);
+  await expect(page.locator('[data-f=compArea] .unit')).toHaveText('㎡');
+  await expect(page.locator('[data-f=height] .unit')).toHaveText('m');
+  await setField(page, 'compArea', '-5');
+  await expect(page.locator('[data-f=compArea] .ferr')).toContainText('数值不能为负');
+  await page.click('#runBtn');
+  await expect(page.locator('.toast.err')).toContainText('请修正 1 项输入');
+  await expect(page.locator('#output')).toHaveCount(1); await expect(page.locator('.doc')).toHaveCount(0);
+  await setField(page, 'compArea', '2000'); await expect(page.locator('[data-f=compArea] .ferr')).toHaveCount(0);
+  await run(page);
+  await expect(page.locator('.doc .doc-h')).toContainText('规范符合性校核');
+  await expect(page.locator('.tblwrap .tcopy').first()).toBeAttached();
+  await page.click('#wordBtn'); await expect(page.locator('.toast.ok').last()).toContainText('已导出');
+});
+test('US-24 资源管理器键盘导航与总览 KPI', async ({ page }) => {
+  await expect(page.locator('#kpis .kpi')).toHaveCount(4);
+  await expect(page.locator('#kpis')).toContainText('折合 A1 8.00 张');
+  await page.locator('#tree').focus();
+  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter');
+  await expect(page.locator('.tab.active')).toContainText('规划条件');
+  await page.locator('#tabcontent').click({ position: { x: 5, y: 5 } }).catch(() => {});
+  await page.click('.titem[data-id=dashboard]');
+  await page.locator('.card[data-id=cost]').focus(); await page.keyboard.press('Enter');
+  await expect(page.locator('.tab.active')).toContainText('估算概算');
+});
