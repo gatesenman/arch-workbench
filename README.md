@@ -48,6 +48,11 @@ npm test             # Playwright
 
 - [源码与脚本](package.json)
 
+
+## 贡献
+
+欢迎通过 Issue 和 Pull Request 参与，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。参与时请遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+
 ## 许可证
 
 `package.json` 声明为 MIT。仓库根目录未附带 LICENSE 文件。
@@ -106,7 +111,11 @@ npm test             # Playwright
 
 - [源码与脚本](package.json)
 
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Please report vulnerabilities privately via [SECURITY.md](SECURITY.md). This project follows [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
 ## License
 
 `package.json` declares MIT. There is no LICENSE file at the repository root.
-
