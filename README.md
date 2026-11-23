@@ -4,9 +4,11 @@
 
 ## 界面截图
 
+以下为仓库已有的真实产品界面。状态栏可见「离线模拟模式」，因此这些图是**离线模拟**，不是已接入真实 LLM 的生产实况，也不是 Windows 安装包截图（本仓库没有 GitHub Release）。
+
 ![项目总览](docs/screenshots/01.png)
 
-*项目总览 / Project overview*
+*项目总览（离线模拟模式） / Project overview (offline simulation)*
 
 ![智能体菜单](docs/screenshots/02.png)
 
@@ -67,9 +69,11 @@ npm test             # Playwright
 
 ## Screenshots
 
+These are existing real product captures. The status bar shows offline simulation mode. They are not a live-LLM production session and not Windows-installer shots (no GitHub Release).
+
 ![Project overview](docs/screenshots/01.png)
 
-*项目总览 / Project overview*
+*项目总览（离线模拟模式） / Project overview (offline simulation)*
 
 ![Agent menu](docs/screenshots/02.png)
 
